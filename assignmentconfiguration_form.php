@@ -51,7 +51,7 @@
         }
 
 
-        $mform->addElement('select', 'assessmentsconfigreportselect', '', $assessments);
+        $mform->addElement('select', 'assessmentsconfigreportselect', get_string('selectlabel', 'report_assignmentconfiguration'), $assessments);
         $mform->getElement('assessmentsconfigreportselect')->setMultiple(false);
         $mform->setDefault('assessmentsconfigreportselect', 0);
 

@@ -35,6 +35,7 @@ $cmid                    = optional_param('cmid', 0, PARAM_INT); // Course modul
 $url = new moodle_url('/report/assignmentconfiguration/index.php', ['id' => $id, 'cmid' => $cmid]);
 $PAGE->set_url($url);
 $PAGE->set_pagelayout('admin');
+$PAGE->set_title(get_string('pluginname', 'report_assignmentconfiguration'));
 $PAGE->add_body_class('report_assignmentconfiguration');
 
 if (!$course = $DB->get_record('course', ['id' => $id])) {
@@ -46,8 +47,9 @@ if (!$course = $DB->get_record('course', ['id' => $id])) {
 require_login($course);
 $context = context_course::instance($course->id);
 require_capability('report/assignmentconfiguration:grade', $context);
+$PAGE->set_context($context);
 // Display the backup report.
-$PAGE->set_title(format_string($course->shortname, true, ['context' => $context]));
+// $PAGE->set_title(format_string($course->shortname, true, ['context' => $context]));
 $PAGE->set_heading(format_string($course->fullname, true, ['context' => $context]));
 echo $OUTPUT->header();
 
@@ -57,13 +59,22 @@ $assigments = $manager::get_assessments($id);
 $mform = new assignmentconfiguration_form(null, ['id' => $id, 'cmid' => $cmid, 'assignments' => $assigments]);
 
 if ($data = $mform->get_data()) {
+    $details = $manager::get_report($id, $data->assignmentdetails ,$data->assessmentsconfigreportselect, $data->cmid);
+    echo $OUTPUT->render_from_template('report_assignmentconfiguration/report_view', $details);
+} else if ($mform->is_cancelled()) {
+    redirect( new moodle_url('/course/view.php', ['id' => $id]));
+} 
 
-}
 
 
 echo $OUTPUT->box_start();
+echo html_writer::start_tag('h3');
+echo get_string('pluginname', 'report_assignmentconfiguration');
+echo html_writer::end_tag('h3');
+echo html_writer::end_tag('br');
 
 $mform->display();
+
 
 echo $OUTPUT->box_end();
 echo $OUTPUT->footer();

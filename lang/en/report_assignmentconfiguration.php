@@ -26,4 +26,5 @@
  $string['privacy:metadata']             = 'The Assessment feedback download repor plugin does not store any personal data.';
  $string['cantdisplayerror']             = 'This report is only functional in  courses.';
  $string['getreport']                    = 'Get report';
+ $string['selectlabel']                  = 'Select assessment';
 

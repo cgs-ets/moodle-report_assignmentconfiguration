@@ -1,0 +1,77 @@
+<h2> Configuration Settings for: <a href = {{{editurl}}} target = "_blank">{{name}}</a></h2>
+
+<h3>Availability</h3>
+<ul>
+    <li><strong>Allow submission from:</strong> {{allowsubmissionsfromdate}}</li>
+    <li><strong>Due date:</strong> {{#duedate}}{{duedate}}{{/duedate}}{{^duedate}}Not set{{/duedate}}</li>
+    <li><strong>Cut-off date:</strong> {{#cutoffdate}}{{cutoffdate}}{{/cutoffdate}}{{^cutoffdate}}Not set{{/cutoffdate}}</li>
+    <li><strong>Remind me to grade by:</strong> {{#gradingduedate}}{{gradingduedate}}{{/gradingduedate}}{{^gradingduedate}}Not set{{/gradingduedate}}</li>
+    <li><strong>Time limit:</strong> {{#timelimit}}{{timelimit}}{{/timelimit}}{{^timelimit}}Not set{{/timelimit}}</li>
+</ul>
+
+<h3>Submission Types</h3>
+<ul>
+    {{#config.assignsubmission}}
+    <li>{{.}}</li>
+    {{/config.assignsubmission}}
+</ul>
+
+<h3>Feedback Types</h3>
+<ul>
+    {{#config.assignfeedback}}
+    <li>{{.}}</li>
+    {{/config.assignfeedback}}
+</ul>
+
+<h3>Submission Settings</h3>
+<ul>
+    <li><strong>Require students to click the submit button:</strong> {{#submissiondrafts}}Yes{{/submissiondrafts}}{{^submissiondrafts}}No{{/submissiondrafts}}</li>
+    <li><strong>Require that students accept the submission statement:</strong> {{#requiresubmissionstatement}}Yes{{/requiresubmissionstatement}}{{^requiresubmissionstatement}}No{{/requiresubmissionstatement}}</li>
+    <li><strong>Additional attempts:</strong> {{#attemptreopenmethod}}{{attemptreopenmethod}}{{/attemptreopenmethod}}</li>
+    <li><strong>Maximum attempts:</strong> {{#maxattempts}}{{maxattempts}}{{/maxattempts}}</li>
+</ul>
+
+<h3>Group Submission Settings</h3>
+<ul>
+    <li><strong>Team submission:</strong> {{#teamsubmission}}Yes{{/teamsubmission}}{{^teamsubmission}}No{{/teamsubmission}}</li>
+    <li><strong>Require all team members submit:</strong> {{#requireallteammemberssubmit}}Yes{{/requireallteammemberssubmit}}{{^requireallteammemberssubmit}}No{{/requireallteammemberssubmit}}</li>
+    <li><strong>Team submission grouping ID:</strong> {{#teamsubmissiongroupingid}}{{teamsubmissiongroupingid}}{{/teamsubmissiongroupingid}}{{^teamsubmissiongroupingid}}No{{/teamsubmissiongroupingid}}</li>
+    
+</ul>
+
+<h3>Grade</h3>
+<ul>
+    {{#grade_details}}
+    <li><strong>Type:</strong> {{type}}</li>
+    <li><strong>Max grade:</strong> {{maxgrade}}</li>
+    <li><strong>Category:</strong> {{category}}</li>
+    <li><strong>Grade pass:</strong> {{gradepass}}</li>
+    <li><strong>Method:</strong> {{method}}</li>
+    <li><strong>Anonymous submissions:</strong> {{annon}}</li>
+    <li><strong>Hide grader identity from students:</strong> {{hidegrader}}</li>
+    <li><strong>Use marking workflow:</strong> {{markingworkflow}}</li>
+    {{/grade_details}}
+</ul>
+
+<h3>Outcomes</h3>
+<ul>
+    {{#outcome}}
+    <li>{{name}}</li>
+    {{/outcome}}
+</ul>
+
+<h3>Turnitin Plagiarism Settings</h3>
+<ul>
+    <li><strong>Enable Turnitin:</strong> {{plagiarism.use_turnitin}}</li>
+    <li><strong>Display Similarity Reports to Students:</strong> {{plagiarism.similarityreport}}</li>
+    <li><strong>Allow submission of any file type:</strong> {{plagiarism.plagiarism_allow_non_or_submissions}}</li>
+    <li><strong>Submit papers to:</strong> {{plagiarism.plagiarism_submitpapersto}}</li>
+    <li><strong>Check against stored student papers:</strong> {{plagiarism.plagiarism_compare_student_papers}}</li>
+    <li><strong>Check against internet:</strong> {{plagiarism.plagiarism_compare_internet}}</li>
+    <li><strong>Check against journals, periodicals and publications:</strong> {{plagiarism.plagiarism_compare_journals}}</li>
+    <li><strong>Exclude bibliography:</strong> {{plagiarism.plagiarism_exclude_biblio}}</li>
+    <li><strong>Exclude Quoted Material:</strong> {{plagiarism.plagiarism_exclude_quoted}}</li>
+    <li><strong>Exclusion Value:</strong> {{plagiarism.plagiarism_exclude_matches}}</li>
+    <li><strong>Exclude matches value:</strong> {{plagiarism.plagiarism_exclude_matches_value}}</li>
+    <li><strong>Attach a rubric to this assignment:</strong> {{plagiarism.plagiarism_transmatch}}</li>
+</ul>
