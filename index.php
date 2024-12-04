@@ -21,22 +21,18 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use function report_assignmentconfiguration\test;
+
 require_once('../../config.php');
 require_once($CFG->libdir . '/adminlib.php');
-require_once('lib.php');
 require_once($CFG->dirroot . '/mod/assign/locallib.php');
+require_once($CFG->dirroot . '/report/assignmentconfiguration/classes/reportxsl.php');
+require_once('lib.php');
 require_once('assignmentconfiguration_form.php');
 
-
-$id                      = optional_param('id', 0, PARAM_INT); // Course ID.
-$cmid                    = optional_param('cmid', 0, PARAM_INT); // Course module ID.
-
-
-$url = new moodle_url('/report/assignmentconfiguration/index.php', ['id' => $id, 'cmid' => $cmid]);
-$PAGE->set_url($url);
-$PAGE->set_pagelayout('admin');
-$PAGE->set_title(get_string('pluginname', 'report_assignmentconfiguration'));
-$PAGE->add_body_class('report_assignmentconfiguration');
+$id = optional_param('id', 0, PARAM_INT); // Course ID.
+$cmid = optional_param('cmid', 0, PARAM_INT); // Course module ID.
+$data = data_submitted();
 
 if (!$course = $DB->get_record('course', ['id' => $id])) {
     $message = get_string('invalidcourse', 'report_assignfeedback_download');
@@ -44,30 +40,48 @@ if (!$course = $DB->get_record('course', ['id' => $id])) {
     \core\notification::add($message, $level);
 }
 
+if ($data && confirm_sesskey()) {
+
+    if (isset($data->downloadbutton)) {
+        $details = report_assignmentconfiguration\manager::get_report($id, $data->selectedassessmentsJSON);
+        report_assignmentconfiguration\report_assignmentconfiguration_setup_workbook($details, $course, $cmid);
+    }
+}
+
+$url = new moodle_url('/report/assignmentconfiguration/index.php', ['id' => $id, 'cmid' => $cmid]);
+$PAGE->set_url($url);
+$PAGE->set_pagelayout('admin');
+$PAGE->set_title(get_string('pluginname', 'report_assignmentconfiguration'));
+$PAGE->add_body_class('report_assignmentconfiguration');
+
+
 require_login($course);
 $context = context_course::instance($course->id);
 require_capability('report/assignmentconfiguration:grade', $context);
 $PAGE->set_context($context);
-// Display the backup report.
-// $PAGE->set_title(format_string($course->shortname, true, ['context' => $context]));
 $PAGE->set_heading(format_string($course->fullname, true, ['context' => $context]));
+
 echo $OUTPUT->header();
 
 $manager = new report_assignmentconfiguration\manager();
 
-$assigments = $manager::get_assessments($id);
-$mform = new assignmentconfiguration_form(null, ['id' => $id, 'cmid' => $cmid, 'assignments' => $assigments]);
+$categories = $manager::get_grade_categories($id);
+
+$mform = new assignmentconfiguration_form(null, ['id' => $id, 'cmid' => $cmid, 'gradecategories' => $categories]);
+$filter = false;
 
 if ($data = $mform->get_data()) {
-    $details = $manager::get_report($id, $data->assignmentdetails ,$data->assessmentsconfigreportselect, $data->cmid);
-    echo $OUTPUT->render_from_template('report_assignmentconfiguration/report_view', $details);
+    $filter = true;
+    $details = $manager::get_report($id, $data->selectedassessmentsJSON);
+    if ($data->getbutton) {
+        echo $OUTPUT->render_from_template('report_assignmentconfiguration/report_view', $details);
+    }
 } else if ($mform->is_cancelled()) {
-    redirect( new moodle_url('/course/view.php', ['id' => $id]));
-} 
-
-
+    redirect(new moodle_url('/course/view.php', ['id' => $id]));
+}
 
 echo $OUTPUT->box_start();
+
 echo html_writer::start_tag('h3');
 echo get_string('pluginname', 'report_assignmentconfiguration');
 echo html_writer::end_tag('h3');
@@ -75,7 +89,9 @@ echo html_writer::end_tag('br');
 
 $mform->display();
 
-
 echo $OUTPUT->box_end();
-echo $OUTPUT->footer();
 
+// Call JS.
+$PAGE->requires->js_call_amd('report_assignmentconfiguration/control', 'init');
+
+echo $OUTPUT->footer();

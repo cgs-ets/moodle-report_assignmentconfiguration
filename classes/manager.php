@@ -27,73 +27,146 @@ require_once('../../config.php');
  * Class to manage the plugin
  */
 class manager {
-    
+
     const GRADE_TYPE = [ 'None',  'Point', 'Scale'];
     const SUBMISSION_ATTEMPT = [ 'none' => 'Never', 'manual' => 'Manually', 'untilpass' => 'Automatically until pass'];
 
-    public static function get_assessments($course) {
+    /**
+     * Get the assessments for this course
+     *
+     * @param mixed $course
+     */
+    public static function get_assessments($course, $ids) {
         global $DB;
 
-        $sql = 'SELECT *
-                FROM {assign} WHERE course = :course';
+        $sql = "SELECT *
+                FROM {assign}
+                WHERE course = :course
+                AND id IN ($ids)";
 
         $r = $DB->get_records_sql($sql, ['course' => $course]);
 
         return $r;
 
     }
+    /**
+     * Get the assessments for this course
+     *
+     * @param mixed $course
+     */
+    public static function get_assessments_by_category($course, $category) {
+        global $DB;
 
-    public static function get_report($course, $assignments, $assignid, $cmid) {
+        $sql = "SELECT iteminstance, itemname
+                FROM {grade_items}
+                WHERE courseid = :course
+                AND itemmodule = :itemmodule
+                AND categoryid IN ($category)";
+
+        $r = $DB->get_records_sql($sql, ['course' => $course, 'itemmodule' => "assign"]);
+
+        return $r;
+
+    }
+    /**
+     * Get the grade categories for this course
+     *
+     * @param mixed $course
+     * @return void
+     */
+    public static function get_grade_categories($course) {
+        global $DB;
+
+        $sql = 'SELECT * FROM mdl_grade_categories WHERE courseid = :courseid;';
+        $params = ['courseid' => $course];
+
+        $results = $DB->get_records_sql($sql, ['courseid' => $course]);
+
+
+        foreach($results as $result) {
+            if ($result->fullname == '?') {
+                $result->fullname = 'Uncategorised';
+            }
+        }
+
+        return $results;
+    }
+
+    /**
+     *  Get the mustache context to generate the report view
+     *
+     * @param mixed $course
+     * @param mixed $assignments
+     * @param mixed $assignid
+     * @param mixed $cmid
+     */
+    public static function get_report($course, $assignments) {
         global $DB;
         // Get general information already fetched.
         $assignments = json_decode($assignments, true);
+        $assigmentsids = implode(',', $assignments);
+        $assignments = self::get_assessments($course, $assigmentsids);
 
-        $assign = $assignments[$assignid];
-        $assign['allowsubmissionsfromdate'] = $assign['allowsubmissionsfromdate'] == 0 ? 'Not set' : userdate($assign['allowsubmissionsfromdate']);
-        $assign['cutoffdate'] = $assign['cutoffdate'] == 0 ? 'Not set' : userdate($assign['cutoffdate']);
-        $assign['duedate'] = $assign['duedate'] == 0 ? 'No' : userdate($assign['duedate']);
-        $assign['gradingduedate'] = $assign['gradingduedate'] == 0 ? 'Not set' : userdate($assign['gradingduedate']);
-        $assign['timelimit'] = $assign['timelimit'] == 0 ? 'Not set' : userdate($assign['timelimit']);
-        $assign['attemptreopenmethod'] = self::SUBMISSION_ATTEMPT[$assign['attemptreopenmethod']];
-        $assign['maxattempts'] = $assign['maxattempts'] == -1 ? 'Unlimited' : $assign['maxattempts'];
-        $config = self::get_submissionandfeedbacktype_configuration($assignid);
-        $gradeandoutcomes = self::get_grade_and_outcome_configuration($course, $assignid, $assign);
-        $coursemoduleid= self::get_cmid($course, $assignid);
-        $turnitinconfig =  self::get_turnitin_config($course, $assignid, $coursemoduleid);
-        $assign['editurl'] = new \moodle_url('/course/modedit.php', ['update' => $coursemoduleid, 'return' => 1]);
-        $details = $assign;
-        $details['grade_details'] = $gradeandoutcomes['grade'];
-        $details['config'] = $config;
-        $details['outcome'] = $gradeandoutcomes['outcome'];
-        $details['plagiarism'] = $turnitinconfig;
+        $assignmentsdetails = [];
 
-        return $details;
+        foreach ($assignments as $assignid => $assignment) {
+
+            $assign = $assignment; //$assignments[$assignid];
+            $assign->allowsubmissionsfromdate = $assign->allowsubmissionsfromdate == 0 ? 'Not set' : userdate($assign->allowsubmissionsfromdate);
+            $assign->cutoffdate = $assign->cutoffdate == 0 ? 'Not set' : userdate($assign->cutoffdate);
+            $assign->duedate = $assign->duedate == 0 ? 'No' : userdate($assign->duedate);
+            $assign->gradingduedate = $assign->gradingduedate == 0 ? 'Not set' : userdate($assign->gradingduedate);
+            $assign->timelimit = $assign->timelimit == 0 ? 'Not set' : userdate($assign->timelimit);
+            $assign->attemptreopenmethod = self::SUBMISSION_ATTEMPT[$assign->attemptreopenmethod];
+            $assign->maxattempts = $assign->maxattempts == -1 ? 'Unlimited' : $assign->maxattempts;
+            $config = self::get_submissionandfeedbacktype_configuration($assignid);
+            $gradeandoutcomes = self::get_grade_and_outcome_configuration($course, $assignid, $assign);
+            // error_log(print_r($gradeandoutcomes['grade'], true));
+            $coursemoduleid = self::get_cmid($course, $assignid);
+            $turnitinconfig = self::get_turnitin_config($course, $assignid, $coursemoduleid);
+            $assign->editurl = new \moodle_url('/course/modedit.php', ['update' => $coursemoduleid, 'return' => 1]);
+            $details = $assign;
+            $details->grade_details = $gradeandoutcomes['grade'];
+            $details->config = $config;
+            $details->outcome = $gradeandoutcomes['outcome'];
+            $details->plagiarism = $turnitinconfig;
+
+            $assignmentsdetails['details'][] = $details;
+        }
+
+        return $assignmentsdetails;
     }
 
-    private static function get_submissionandfeedbacktype_configuration($assignid){
+    /**
+     * Get the  feedback and submission type configuration for the assigment
+     *
+     * @param mixed $assignid
+     * @return void
+     */
+    private static function get_submissionandfeedbacktype_configuration($assignid) {
         global $DB;
 
         $sql = 'SELECT plugin, subtype
                 FROM {assign_plugin_config}
                 WHERE assignment = :assignment
                 AND name = :stat
-                AND value = 1 
+                AND value = 1
               ';
 
         $results = $DB->get_records_sql($sql, ['assignment' => $assignid, 'stat' => 'enabled']);
         $config = [];
 
         foreach ($results as $result) {
-            $result->plugin = $result->plugin == 'editpdf' ? 'Annotate PDF' :  $result->plugin;
-            $result->plugin = $result->plugin == 'onlinetext' ? 'Online text' :  $result->plugin;
+            $result->plugin = $result->plugin == 'editpdf' ? 'Annotate PDF' : $result->plugin;
+            $result->plugin = $result->plugin == 'onlinetext' ? 'Online text' : $result->plugin;
             $config[$result->subtype][] = ucfirst($result->plugin); // Group the type = submission or feedback
         }
 
-        if  (is_null($config['assignsubmission'])) {
-            $config['assignsubmission'][] ='Not set';
+        if(is_null($config['assignsubmission'])) {
+            $config['assignsubmission'][] = 'Not set';
         }
 
-        if  (is_null($config['assignfeedback'])) {
+        if(is_null($config['assignfeedback'])) {
             $config['assignfeedback'][] = 'Not set';
         }
 
@@ -101,6 +174,9 @@ class manager {
 
     }
 
+    /**
+     * Get the outcome configuration for this assignment
+     */
     private static function get_grade_and_outcome_configuration($course, $assignid, $assign) {
         global $DB;
 
@@ -115,25 +191,24 @@ class manager {
         $results = $DB->get_records_sql($sql, $params);
         $gradingmethod = self::get_grading_method($assignid);
         $gradeandoutcomes = [];
-        $gradetype;
+        $gradetype = '';
 
         foreach ($results as $result) {
-            if ($result->itemname == $assign['name']) { // Its the assignment itself
+            if ($result->itemname == $assign->name) { // Its the assignment itself
                 $grade = new \stdClass();
-                $gradetype = self::GRADE_TYPE[$result->gradetype]; // If there is outcome, they gradetype comes from there 
+                $gradetype = self::GRADE_TYPE[$result->gradetype]; // If there is outcome, they gradetype comes from there
                 $grade->maxgrade = round($result->grademax);
-                $grade->category = $result->fullname == '?' ?'Uncategorised' : $result->fullname;
+                $grade->category = $result->fullname == '?' ? 'Uncategorised' : $result->fullname;
                 $grade->gradepass = round($result->gradepass);
                 $grade->method = empty($gradingmethod->activemethod) ? 'Simple grading method' : $gradingmethod->activemethod;
-                $grade->annon =  $assign['markinganonymous'] == 0 ? 'No' : 'Yes';
-                $grade->hidegrader =  $assign['hidegrader'] == 0 ? 'No' : 'Yes';
-                $grade->markingworkflow =  $assign['markingworkflow'] == 0 ? 'No' : 'Yes';
-                $grade->markingworkflow =  $assign['markingallocation'] == 0 ? 'No' : 'Yes';
+                $grade->annon = $assign->markinganonymous == 0 ? 'No' : 'Yes';
+                $grade->hidegrader = $assign->hidegrader == 0 ? 'No' : 'Yes';
+                $grade->markingworkflow = $assign->markingworkflow == 0 ? 'No' : 'Yes';
+                $grade->markingworkflow = $assign->markingallocation == 0 ? 'No' : 'Yes';
                 $gradeandoutcomes['grade'][] = $grade;
             } else {
                 $outcome = new \stdClass();
                 $outcome->name = $result->itemname;
-                // $gradetype = self::GRADE_TYPE[$result->gradetype];
                 $gradeandoutcomes['outcome'][] = $outcome;
 
             }
@@ -145,7 +220,8 @@ class manager {
             $gradeandoutcomes['outcome'][] = $outcome;
         }
         ($gradeandoutcomes['grade'][0])->type = $gradetype;
-       return $gradeandoutcomes;
+
+        return $gradeandoutcomes;
 
     }
 
@@ -197,7 +273,7 @@ class manager {
                 JOIN mdl_assign a ON cm.instance = a.id
                 WHERE a.id = :assignment_id
                 AND cm.course = :course_id;';
-        
+
        $r =  $DB->get_record_sql($sql, ['assignment_id' => $assignid, 'course_id' => $course]);
 
        return $r->cmid;
@@ -206,10 +282,9 @@ class manager {
 
     private static function get_turnitin_config($course, $assignid, $cmid) {
         global $DB;
-        // $cmid = self::get_cmid($course, $assignid);
 
-        $sql = 'SELECT * 
-                FROM {plagiarism_turnitin_config} 
+        $sql = 'SELECT *
+                FROM {plagiarism_turnitin_config}
                 WHERE cm = :cmid';
 
         $results =  $DB->get_records_sql($sql, ['cmid' => $cmid]);
@@ -225,41 +300,41 @@ class manager {
                     break;
                 case 'plagiarism_draft_submit':
                     $turnitinconfig->plagiarism_draft_submit = $result->value == 0 ? 'No' : 'Yes';
-                    break;       
+                    break;
                 case 'plagiarism_allow_non_or_submissions':
                     $turnitinconfig->plagiarism_allow_non_or_submissions = $result->value == 0 ? 'No' : 'Yes';
-                    break;       
+                    break;
                 case 'plagiarism_submitpapersto':
                     $turnitinconfig->plagiarism_submitpapersto = $result->value == 0 ? 'No' : 'Yes';
-                    break;       
+                    break;
                 case 'plagiarism_compare_student_papers':
                     $turnitinconfig->plagiarism_compare_student_papers = $result->value == 0 ? 'No' : 'Yes';
-                    break;       
+                    break;
                 case 'plagiarism_compare_internet':
                     $turnitinconfig->plagiarism_compare_internet = $result->value == 0 ? 'No' : 'Yes';
-                    break;       
+                    break;
                 case 'plagiarism_compare_journals':
                     $turnitinconfig->plagiarism_compare_journals = $result->value == 0 ? 'No' : 'Yes';
-                    break;       
+                    break;
                 case 'plagiarism_report_gen':
                     $turnitinconfig->plagiarism_report_gen = $result->value == 0 ? 'No' : 'Yes';
-                    break;       
+                    break;
                 case 'plagiarism_exclude_biblio':
                     $turnitinconfig->plagiarism_exclude_biblio = $result->value == 0 ? 'No' : 'Yes';
-                    break;       
+                    break;
                 case 'plagiarism_exclude_quoted':
                     $turnitinconfig->plagiarism_exclude_quoted = $result->value == 0 ? 'No' : 'Yes';
-                    break;       
+                    break;
                 case 'plagiarism_exclude_matches':
                     $turnitinconfig->plagiarism_exclude_matches = $result->value == 0 ? 'No' : 'Yes';
-                    break;       
+                    break;
                 case 'plagiarism_exclude_matches_value':
                     $turnitinconfig->plagiarism_exclude_matches_value = $result->value;
-                    break;       
+                    break;
                 case 'plagiarism_transmatch':
                     $turnitinconfig->plagiarism_transmatch = $result->value == 0 ? 'No' : 'Yes';
-                    break;       
-                    
+                    break;
+
             }
 
 

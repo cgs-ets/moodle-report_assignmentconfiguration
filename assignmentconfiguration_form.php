@@ -40,30 +40,52 @@
         $mform->settype('id', PARAM_INT); // To be able to pre-fill the form.
         $mform->addElement('hidden', 'cmid', $this->_customdata['cmid']);
         $mform->settype('cmid', PARAM_INT); // To be able to pre-fill the form.
-        $mform->addElement('hidden', 'assignmentdetails', json_encode($this->_customdata['assignments']));
-        $mform->settype('assignmentdetails', PARAM_TEXT); // To be able to pre-fill the form.
+        $mform->addElement('hidden', 'gradecategories', json_encode($this->_customdata['gradecategories']));
+        $mform->settype('gradecategories', PARAM_TEXT); // To be able to pre-fill the form.
 
+        // Grade Categories.
+        $gradecategories = [];
 
-        $assessments = []; // Assessments in the course
-
-        foreach($this->_customdata['assignments'] as $id => $assign) {
-            $assessments[$id] = $assign->name;
+        foreach ($this->_customdata['gradecategories'] as $id => $category) {
+            $gradecategories[$id] = $category->fullname;
         }
 
+        $mform->addElement('select', 'gradecategoriesselect', get_string('select:category', 'report_assignmentconfiguration'), $gradecategories);
+        $mform->getElement('gradecategoriesselect')->setMultiple(true);
+        $mform->addRule('gradecategoriesselect', '', 'required', null, 'server');
+        $mform->setDefault('gradecategoriesselect', 0);
 
-        $mform->addElement('select', 'assessmentsconfigreportselect', get_string('selectlabel', 'report_assignmentconfiguration'), $assessments);
-        $mform->getElement('assessmentsconfigreportselect')->setMultiple(false);
-        $mform->setDefault('assessmentsconfigreportselect', 0);
+        // Generate a drop down  with the activities available in the category(ies) selected.
+        $mform->addElement('text', 'selectedcategoriesJSON', 'Select category(ies) JSON');
+        $mform->settype('selectedcategoriesJSON', PARAM_RAW);
+        $mform->setDefault('selectedcategoriesJSON', '[]');
+
+        $mform->addElement('html', '<div class="report-assignmentconfiguration-assignments-container"></div>');
+        $mform->addElement('text', 'selectedassessmentsJSON', 'Select assessments JSON');
+
+        $mform->settype('selectedassessmentsJSON', PARAM_RAW);
+        $mform->setDefault('selectedassessmentsJSON', '[]');
 
         $buttonarray = [];
 
-        $buttonarray[] = &$mform->createElement('submit', 'submitbutton', get_string('getreport', 'report_assignmentconfiguration'));
+        $buttonarray[] = &$mform->createElement('submit', 'getbutton', get_string('report:get', 'report_assignmentconfiguration'));
+        $buttonarray[] = &$mform->createElement('submit', 'downloadbutton', get_string('report:download', 'report_assignmentconfiguration'));
         $buttonarray[] = &$mform->createElement('cancel', 'canceltbutton');
 
         $mform->addGroup($buttonarray, 'buttonar', '', [' '], false);
 
         $mform->closeHeaderBefore('buttonar');
 
+    }
+
+    function validation($data, $files)    {
+        $errors = parent::validation($data, $files);
+
+        if ($data['selectedassessmentsJSON'] == '[]') {
+            $errors ['gradecategoriesselect'] = 'Select an assignment';
+        }
+
+        return $errors;
     }
 
  }

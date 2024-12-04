@@ -1,0 +1,25 @@
+{
+  "name": "assignmentconfiguration",
+  "version": "1.0.0",
+  "description": "A Moodle plugin for downloading Assignments configurations",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cgs-ets/moodle-report_assignmentconfiguration.git"
+  },
+  "author": "Veronica Bermegui",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/cgs-ets/moodle-report_assignmentconfiguration/issues"
+  },
+  "homepage": "https://github.com/cgs-ets/moodle-report_assignmentconfiguration#readme",
+  "dependencies": {
+    "grunt": "^1.6.1",
+    "grunt-contrib-less": "^3.0.0",
+    "grunt-contrib-uglify": "^5.2.2",
+    "grunt-contrib-watch": "^1.1.0"
+  }
+}

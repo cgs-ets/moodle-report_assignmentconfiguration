@@ -1,3 +1,6 @@
+
+{{#details}}
+<br>
 <h2> Configuration Settings for: <a href = {{{editurl}}} target = "_blank">{{name}}</a></h2>
 
 <h3>Availability</h3>
@@ -36,7 +39,7 @@
     <li><strong>Team submission:</strong> {{#teamsubmission}}Yes{{/teamsubmission}}{{^teamsubmission}}No{{/teamsubmission}}</li>
     <li><strong>Require all team members submit:</strong> {{#requireallteammemberssubmit}}Yes{{/requireallteammemberssubmit}}{{^requireallteammemberssubmit}}No{{/requireallteammemberssubmit}}</li>
     <li><strong>Team submission grouping ID:</strong> {{#teamsubmissiongroupingid}}{{teamsubmissiongroupingid}}{{/teamsubmissiongroupingid}}{{^teamsubmissiongroupingid}}No{{/teamsubmissiongroupingid}}</li>
-    
+
 </ul>
 
 <h3>Grade</h3>
@@ -75,3 +78,6 @@
     <li><strong>Exclude matches value:</strong> {{plagiarism.plagiarism_exclude_matches_value}}</li>
     <li><strong>Attach a rubric to this assignment:</strong> {{plagiarism.plagiarism_transmatch}}</li>
 </ul>
+
+<hr>
+{{/details}}

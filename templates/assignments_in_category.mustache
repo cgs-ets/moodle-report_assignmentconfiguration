@@ -1,0 +1,22 @@
+<div id="fitem_id_assignselected" class="mb-3 row  fitem" >
+    <div class="col-md-3 col-form-label d-flex pb-0 pe-md-0">
+                <label id="id_assignselected_label" class="d-inline word-break " for="id_assignselected_label">
+                    Choose one or more assignments in the category selected
+                </label>
+
+        <div class="form-label-addon d-flex align-items-center align-self-start">
+
+        </div>
+    </div>
+    <div class="col-md-9 d-flex flex-wrap align-items-start felement" data-fieldtype="select" >
+            <input type="hidden" name="assignselected" value="_qf__force_multiselect_submission">
+			<select class=" form-control" name="assignselected[]"  id="id_assignselected" multiple size="{{size}}" data-initial-value="" data-cmids = "{{cmids}}">
+				{{#items}}
+					<option value = "{{iteminstance}}">{{itemname}}</option>
+				{{/items}}
+			</select>
+        <div class="form-control-feedback invalid-feedback" id="id_error_assignselected">
+
+        </div>
+    </div>
+</div>
