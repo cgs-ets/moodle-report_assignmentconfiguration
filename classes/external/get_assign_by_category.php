@@ -63,9 +63,8 @@ trait get_assign_by_category {
         $categoryids = implode(',', json_decode($data));
         $manager = new \report_assignmentconfiguration\manager();
         $assigments = $manager::get_assessments_by_category($course, $categoryids);
-        error_log(print_r("ASSIGN", true));
-        error_log(print_r($assigments, true));
         $items = [];
+
         foreach($assigments as $assign) {
             $items['items'][] =  $assign;
         }

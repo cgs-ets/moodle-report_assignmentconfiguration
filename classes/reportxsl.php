@@ -238,18 +238,18 @@ function report_assignmentconfiguration_setup_rows(MoodleExcelWorksheet $sheet, 
         $sheet->write_string($row, $col++ , $outcome->name, $format);
     }
 
-    // $sheet->write_string($row, $col++ , $assessment->use_turnitin, $format);
-    // $sheet->write_string($row, $col++ , $assessment->similarityreport, $format);
-    // $sheet->write_string($row, $col++ , $assessment->plagiarism_allow_non_or_submissions, $format);
-    // $sheet->write_string($row, $col++ , $assessment->plagiarism_submitpapersto, $format);
-    // $sheet->write_string($row, $col++ , $assessment->plagiarism_compare_student_papers, $format);
-    // $sheet->write_string($row, $col++ , $assessment->plagiarism_compare_internet, $format);
-    // $sheet->write_string($row, $col++ , $assessment->plagiarism_compare_journals, $format);
-    // $sheet->write_string($row, $col++ , $assessment->plagiarism_exclude_biblio, $format);
-    // $sheet->write_string($row, $col++ , $assessment->plagiarism_exclude_quoted, $format);
-    // $sheet->write_string($row, $col++ , $assessment->plagiarism_exclude_matches, $format);
-    // $sheet->write_string($row, $col++ , $assessment->plagiarism_exclude_matches_value, $format);
-    // $sheet->write_string($row, $col++ , $assessment->plagiarism_transmatch, $format);
+
+    $sheet->write_string($row, $col++ , $assessment->plagiarism->use_turnitin, $format);
+    $sheet->write_string($row, $col++ , $assessment->plagiarism->similarityreport, $format);
+    $sheet->write_string($row, $col++ , $assessment->plagiarism->plagiarism_allow_non_or_submissions, $format);
+    $sheet->write_string($row, $col++ , $assessment->plagiarism->plagiarism_submitpapersto, $format);
+    $sheet->write_string($row, $col++ , $assessment->plagiarism->plagiarism_compare_student_papers, $format);
+    $sheet->write_string($row, $col++ , $assessment->plagiarism->plagiarism_compare_internet, $format);
+    $sheet->write_string($row, $col++ , $assessment->plagiarism->plagiarism_compare_journals, $format);
+    $sheet->write_string($row, $col++ , $assessment->plagiarism->plagiarism_exclude_biblio, $format);
+    $sheet->write_string($row, $col++ , $assessment->plagiarism->plagiarism_exclude_quoted, $format);
+    $sheet->write_string($row, $col++ , $assessment->plagiarism->plagiarism_exclude_matches, $format);
+    $sheet->write_string($row, $col, $assessment->plagiarism->plagiarism_transmatch, $format);
 
 }
 
@@ -297,7 +297,7 @@ function report_assignmentconfiguration_setup_rows(MoodleExcelWorksheet $sheet, 
             }
 
             header("Content-Type: application/zip");
-            header("Content-Disposition: attachment; filename=grades.zip");
+            header("Content-Disposition: attachment; filename=assignconfig.zip");
             header("Content-Length: " . filesize("$filename"));
             readfile("$filename");
             unlink("$filename");
@@ -306,6 +306,6 @@ function report_assignmentconfiguration_setup_rows(MoodleExcelWorksheet $sheet, 
             redirect($url, get_string('nofilestocompress', 'report_assignfeedback_download'), null, \core\output\notification::NOTIFY_INFO);
         }
 
-        die(); // If not set, a invalid zip file error is thrown.
+       die(); // If not set, a invalid zip file error is thrown.
 
     }

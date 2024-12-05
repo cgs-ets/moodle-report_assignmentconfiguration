@@ -192,11 +192,18 @@ class manager {
         $gradingmethod = self::get_grading_method($assignid);
         $gradeandoutcomes = [];
         $gradetype = '';
+        $scalename = '';
 
         foreach ($results as $result) {
             if ($result->itemname == $assign->name) { // Its the assignment itself
                 $grade = new \stdClass();
                 $gradetype = self::GRADE_TYPE[$result->gradetype]; // If there is outcome, they gradetype comes from there
+
+                if ($gradetype == 'Scale') {
+                    $scaleinfo = self::get_scale_info($result->scaleid);
+                    $scalename = $scaleinfo->name;
+                }
+
                 $grade->maxgrade = round($result->grademax);
                 $grade->category = $result->fullname == '?' ? 'Uncategorised' : $result->fullname;
                 $grade->gradepass = round($result->gradepass);
@@ -219,10 +226,23 @@ class manager {
             $outcome->name = 'Not set';
             $gradeandoutcomes['outcome'][] = $outcome;
         }
+        if ($scalename != '') {
+            $gradetype .=  " ($scalename)";
+        }
         ($gradeandoutcomes['grade'][0])->type = $gradetype;
 
         return $gradeandoutcomes;
 
+    }
+
+    private static function get_scale_info($scaleid) {
+        global $DB;
+
+        $sql = "SELECT name FROM {scale} WHERE id = :id";
+
+        $r = $DB->get_record_sql($sql, ['id' => $scaleid]);
+
+        return $r;
     }
 
     private static function get_grading_method($assignid) {

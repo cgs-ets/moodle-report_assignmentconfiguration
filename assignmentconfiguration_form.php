@@ -81,9 +81,9 @@
     function validation($data, $files)    {
         $errors = parent::validation($data, $files);
 
-        if ($data['selectedassessmentsJSON'] == '[]') {
-            $errors ['gradecategoriesselect'] = 'Select an assignment';
-        }
+        // if ($data['selectedassessmentsJSON'] == '[]') {
+        //     $errors ['gradecategoriesselect'] = 'Select an assignment';
+        // }
 
         return $errors;
     }

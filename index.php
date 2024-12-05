@@ -40,11 +40,17 @@ if (!$course = $DB->get_record('course', ['id' => $id])) {
     \core\notification::add($message, $level);
 }
 
-if ($data && confirm_sesskey()) {
+if ($data && confirm_sesskey() ) {
 
-    if (isset($data->downloadbutton)) {
+    if (isset($data->downloadbutton) && $data->selectedassessmentsJSON != '[]') {
         $details = report_assignmentconfiguration\manager::get_report($id, $data->selectedassessmentsJSON);
         report_assignmentconfiguration\report_assignmentconfiguration_setup_workbook($details, $course, $cmid);
+
+    } else {
+        $error = true;
+        $message = get_string('assessment_error', 'report_assignmentconfiguration');
+        $level = core\output\notification::NOTIFY_ERROR;
+        \core\notification::add($message, $level);
     }
 }
 
@@ -72,8 +78,9 @@ $filter = false;
 
 if ($data = $mform->get_data()) {
     $filter = true;
-    $details = $manager::get_report($id, $data->selectedassessmentsJSON);
-    if ($data->getbutton) {
+
+    if ($data->getbutton && $data->selectedassessmentsJSON != '[]') {
+        $details = $manager::get_report($id, $data->selectedassessmentsJSON);
         echo $OUTPUT->render_from_template('report_assignmentconfiguration/report_view', $details);
     }
 } else if ($mform->is_cancelled()) {
