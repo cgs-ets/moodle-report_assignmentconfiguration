@@ -30,6 +30,7 @@
  $string['select:category']                      = 'Select grade category';
  $string['select:assessment']                    = 'Select assessment';
  $string['select:assessment_error']              = 'Please select assessment';
+ $string['form:goback']                          = 'Return to report form';
  $string['report:availability']                  = 'Availability';
  $string['report:allowsubmissionsfromdate']      = 'Allow submission from';
  $string['report:duedate']                       = 'Due date';

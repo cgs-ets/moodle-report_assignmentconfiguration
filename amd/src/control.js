@@ -19,8 +19,8 @@
 /**
  *
  * @package    report
- * @subpackage ibassessmentreport
- * @copyright  2021 Veronica Bermegui
+ * @subpackage assignmentconfiguration
+ * @copyright  2024 Veronica Bermegui
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -52,12 +52,11 @@ define(["jquery", "core/ajax", "core/log", "core/templates"], function ($, Ajax,
     Controls.prototype.initEventListeners = function () {
         let self = this;
         self.categorySelection.addEventListener('change', this.getAssignmentsForCategory.bind(this));
-
-
     };
 
+
+
     Controls.prototype.getAssignmentsForCategory = function (e) {
-        let categorySelectionJSON = JSON.parse(this.categorySelectionJSON);
 
         // Get the selected options
         let selectedOptions = [];

@@ -48,7 +48,6 @@ function report_assignmentconfiguration_setup_workbook($details, $course, $cmid)
 
     report_assignmentconfiguration_get_report($workbook, $details, $course);
     $tempdir = make_temp_directory('report_assignmentconfiguration/excel');
-    // $workbook->close();
     $workbook->savetotempdir($tempdir);
 
     zip_excelworkbook($course->id, $cmid);
@@ -306,6 +305,6 @@ function report_assignmentconfiguration_setup_rows(MoodleExcelWorksheet $sheet, 
             redirect($url, get_string('nofilestocompress', 'report_assignfeedback_download'), null, \core\output\notification::NOTIFY_INFO);
         }
 
-       die(); // If not set, a invalid zip file error is thrown.
+    //    die(); // If not set, a invalid zip file error is thrown.
 
     }
