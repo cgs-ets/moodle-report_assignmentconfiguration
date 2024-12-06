@@ -305,6 +305,6 @@ function report_assignmentconfiguration_setup_rows(MoodleExcelWorksheet $sheet, 
             redirect($url, get_string('nofilestocompress', 'report_assignfeedback_download'), null, \core\output\notification::NOTIFY_INFO);
         }
 
-    //    die(); // If not set, a invalid zip file error is thrown.
+       die(); // If not set, a invalid zip file error is thrown.
 
     }

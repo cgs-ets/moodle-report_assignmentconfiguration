@@ -54,8 +54,6 @@ define(["jquery", "core/ajax", "core/log", "core/templates"], function ($, Ajax,
         self.categorySelection.addEventListener('change', this.getAssignmentsForCategory.bind(this));
     };
 
-
-
     Controls.prototype.getAssignmentsForCategory = function (e) {
 
         // Get the selected options
